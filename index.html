@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>File Processing App</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            background-color: #e9ecef;
+            color: #333;
+        }
+        .container {
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 30px;
+            background-color: #ffffff;
+            border-radius: 15px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s;
+        }
+        .container:hover {
+            transform: translateY(-5px);
+        }
+        h1 {
+            text-align: center;
+            color: #007bff;
+            margin-bottom: 30px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+        h2 {
+            color: #28a745;
+            margin-top: 20px;
+            font-weight: 600;
+            border-bottom: 2px solid #28a745;
+            padding-bottom: 5px;
+            transition: color 0.3s;
+        }
+        h2:hover {
+            color: #218838;
+        }
+        form {
+            margin-bottom: 30px;
+            border: 1px solid #007bff;
+            border-radius: 10px;
+            padding: 20px;
+            background-color: #f8f9fa;
+            transition: background-color 0.3s;
+        }
+        form:hover {
+            background-color: #e2e6ea;
+        }
+        .text, input[type="file"]{
+            width: 98%;
+            padding: 12px;
+            border-radius: 5px;
+            align-items: center;
+            border: 1px solid #ced4da;
+            margin-top: 10px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        .text:focus, input[type="file"]:focus, input[type="submit"]:focus {
+            border-color: #007bff;
+            outline: none;
+        }
+        .submit{
+            width: 50%;
+            padding: 12px;
+            border-radius: 5px;
+            align-items: center;
+            border: 1px solid #ced4da;
+            margin-top: 10px;
+            text-align: center;
+            justify-content: center;
+            margin-left:25%;
+            font-size: 16px;
+            transition: border-color 0.3s;            
+        }
+        input[type="submit"]:hover {
+            background-color: #0056b3;
+            transform: translateY(-2px);
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            background-color: #ffffff;
+            border-radius: 5px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        img {
+            margin-top: 10px;
+            max-width: 100%;
+            height: auto;
+            border-radius: 5px;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            color: #6c757d;
+            font-size: 14px;
+        }
+    </style>
+    <script>
+        async function handleFormSubmit(event, formId, resultId) {
+            event.preventDefault();
+            const form = document.getElementById(formId);
+            const resultDiv = document.getElementById(resultId);
+            
+            let formData = new FormData(form);
+            const url = form.action;
+
+            try {
+                let response = await fetch(url, {
+                    method: 'POST',
+                    body: formData
+                });
+                let result = await response.json();
+
+                // Display the result
+                if (result.translated_text) {
+                    resultDiv.innerHTML = result.translated_text;
+                } else if (result.result) {
+                    resultDiv.innerHTML = result.result;
+
+                    // If the result is an image, create an img element
+                    if (result.image) {
+                        const img = document.createElement("img");
+                        img.src = "data:image/jpeg;base64," + result.image;
+                        resultDiv.appendChild(img);
+                    }
+                }
+            } catch (error) {
+                resultDiv.innerHTML = "Error: " + error.message;
+            }
+        }
+    </script>
+</head>
+<body>
+    <div class="container">
+        <h1>File Processing App</h1>
+
+        <h2><i class="fas fa-language"></i> Text (English to Tamil Translation)</h2>
+        <form id="text-form" action="/process-text" method="post" onsubmit="handleFormSubmit(event, 'text-form', 'text-result')">
+            <input type ='text' class="text" name="content" rows="4" placeholder="Enter English text here..." required></input><br>
+            <input class="submit" type="submit" value="Translate to Tamil">
+        </form>
+        <div class="result" id="text-result"></div>
+
+        <h2><i class="fas fa-image"></i> Image (Resize to 256x256)</h2>
+        <form id="image-form" action="/process-image" enctype="multipart/form-data" method="post" onsubmit="handleFormSubmit(event, 'image-form', 'image-result')">
+            <input type="file" name="file" accept="image/*" required><br>
+            <input class="submit" type="submit" value="Resize Image">
+        </form>
+        <div class="result" id="image-result"></div>
+
+        <h2><i class="fas fa-volume-up"></i> Audio (Speech-to-Text)</h2>
+        <form id="audio-form" action="/process-audio" enctype="multipart/form-data" method="post" onsubmit="handleFormSubmit(event, 'audio-form', 'audio-result')">
+            <input type="file" name="file" accept="audio/*" required><br>
+            <input class ="submit" type="submit" value="Convert Audio to Text">
+        </form>
+        <div class="result" id="audio-result"></div>
+    </div>
+    <div class="footer">
+        <p>&copy; 2024 File Processing App. All rights reserved.</p>
+    </div>
+</body>
+</html>
