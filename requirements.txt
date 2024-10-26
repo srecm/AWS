@@ -1,0 +1,9 @@
+fastapi
+pydantic
+uvicorn
+pillow
+base64
+speechrecognition
+googletrans==4.0.0rc1
+gunicorn
+deep-translator
